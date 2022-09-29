@@ -1,7 +1,12 @@
 package br.com.emanuelgabrielsousa.consumerapisandboxbb.client;
 
+import br.com.emanuelgabrielsousa.consumerapisandboxbb.client.exceptions.FalhaRecursoException;
 import br.com.emanuelgabrielsousa.consumerapisandboxbb.client.exceptions.RecursoInacessivelException;
+import br.com.emanuelgabrielsousa.consumerapisandboxbb.mapper.request.GuiaArrecadacaoQrCodesRequestDTO;
+import br.com.emanuelgabrielsousa.consumerapisandboxbb.mapper.response.GerarQrCodePagamentoPixResponseDTO;
 import br.com.emanuelgabrielsousa.consumerapisandboxbb.mapper.response.GuiaArrecadacaoQrCodeResponseDTO;
+import br.com.emanuelgabrielsousa.consumerapisandboxbb.mapper.response.GuiaArrecadacaoQrCodesEntityResponseDTO;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,8 +31,11 @@ public class ArrecadacaoQrCodesClient {
 
     private final RestTemplate restTemplate;
 
-    public ArrecadacaoQrCodesClient(RestTemplate restTemplate) {
+    private final ModelMapper mapper;
+
+    public ArrecadacaoQrCodesClient(RestTemplate restTemplate, ModelMapper mapper) {
         this.restTemplate = restTemplate;
+        this.mapper = mapper;
     }
 
     /**
@@ -49,6 +57,25 @@ public class ArrecadacaoQrCodesClient {
 
         } catch (ResourceAccessException ex) {
             throw new RecursoInacessivelException(ex.getMessage());
+        }
+    }
+
+    public GerarQrCodePagamentoPixResponseDTO criarQrCodePagamentoInstantaneoPix(GuiaArrecadacaoQrCodesRequestDTO requestDTO) {
+        log.info("Gera um QR Code de pagamento instantâneo (PIX) para uma guia de arrecadação (com ou sem código de barras) - request: {}", requestDTO);
+
+        try {
+
+            var url = baseUriSandboxBB + "/arrecadacao-qrcodes?gw-dev-app-key=" + chaveDevAppKey;
+            log.info("URL: {}", url);
+
+            var guiaArrecadacaoQrCodesEntityResponseDTO = mapper.map(requestDTO, GuiaArrecadacaoQrCodesEntityResponseDTO.class);
+
+            GerarQrCodePagamentoPixResponseDTO dto = restTemplate.postForObject(url, guiaArrecadacaoQrCodesEntityResponseDTO, GerarQrCodePagamentoPixResponseDTO.class);
+
+            return dto;
+
+        } catch (Exception e) {
+            throw new FalhaRecursoException(e.getMessage());
         }
     }
 }
