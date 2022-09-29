@@ -44,7 +44,7 @@ public class RestTemplateConfig {
                     request.getHeaders().setBearerAuth(accessToken.getTokenValue());
                 }
 
-            }catch (ClientAuthorizationException e){
+            }catch (Exception e){
                 log.error("Erro client: {}", e.getMessage());
             }
 

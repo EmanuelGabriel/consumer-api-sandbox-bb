@@ -26,12 +26,14 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
-                .anyRequest().permitAll();
-                //.and()
-                //.csrf().disable();
+                .anyRequest().permitAll()
+                .and()
+                .csrf().disable();
+
                 //.oauth2ResourceServer()
                 //.jwt()
                 //.jwtAuthenticationConverter(jwtAuthenticationConverter());
+
         return http.build();
 
     }
